@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int sampleRate = 8000;
     private static final int SAMPLE_DELAY = 75;
 
-    private LineChart amplChart;
+    private LineChart amplChart,negAmplChart;
 
 
     @Override
@@ -42,7 +43,19 @@ public class MainActivity extends AppCompatActivity {
 
 
         amplChart = findViewById(R.id.ampl_chart);
+        negAmplChart = findViewById(R.id.ampl_chart_2);
+
         amplChart.setDrawGridBackground(true);
+        amplChart.getLegend().setEnabled(false);
+        amplChart.setDescription(null);
+        amplChart.setTouchEnabled(false);
+        amplChart.setViewPortOffsets(0f, 0f, 0f, 0f);
+
+        negAmplChart.setDrawGridBackground(true);
+        negAmplChart.getLegend().setEnabled(false);
+        negAmplChart.setDescription(null);
+        negAmplChart.setTouchEnabled(false);
+        negAmplChart.setViewPortOffsets(0f, 0f, 0f, 0f);
 
 
 
@@ -50,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         data.setValueTextColor(Color.BLACK);
 
         amplChart.setData(data);
+        negAmplChart.setData(data);
 
         XAxis xl = amplChart.getXAxis();
         xl.setTextColor(Color.WHITE);
@@ -65,9 +79,28 @@ public class MainActivity extends AppCompatActivity {
         leftAxis.setAxisMinValue(0f);
         leftAxis.setDrawGridLines(true);
 
+        XAxis xl2 = negAmplChart.getXAxis();
+        xl2.setTextColor(Color.WHITE);
+
+        xl2.setDrawGridLines(true);
+        xl2.setAvoidFirstLastClipping(true);
+        xl2.setSpaceBetweenLabels(5);
+        xl2.setEnabled(true);
+
+        YAxis leftAxis2 = negAmplChart.getAxisLeft();
+        leftAxis2.setTextColor(Color.WHITE);
+        leftAxis2.setAxisMaxValue(0f);
+        leftAxis2.setAxisMinValue(-100f);
+        leftAxis2.setDrawGridLines(true);
+
+
+
+
         YAxis rightAxis = amplChart.getAxisRight();
         rightAxis.setEnabled(false);
 
+        YAxis rightAxis2 = negAmplChart.getAxisRight();
+        rightAxis2.setEnabled(false);
 
 
         int sampleRate = 8000;
@@ -97,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
         set.setFillColor(ColorTemplate.getHoloBlue());
         set.setDrawCubic(true);
         set.setCubicIntensity(0.2f);
-        set.setDrawHorizontalHighlightIndicator(false);
+//        set.setDrawHorizontalHighlightIndicator(false);
 
 
         set.setHighLightColor(Color.rgb(244, 117, 117));
@@ -127,27 +160,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addEntry(Double lastLevel, long currentTime) {
+        Log.d("Buffer","val="+lastLevel);
+
 
         LineData data = amplChart.getData();
+        LineData data2 = negAmplChart.getData();
 
         if (data != null) {
 
             ILineDataSet set = data.getDataSetByIndex(0);
+            ILineDataSet set2 = data.getDataSetByIndex(0);
 
             if (set == null) {
                 set = createSet();
+                set2 = createSet();
                 data.addDataSet(set);
+                data2.addDataSet(set2);
+
             }
 
             data.addXValue(currentTime+"");
+            data2.addXValue(currentTime+"");
             data.addEntry(new Entry(lastLevel.floatValue(), set.getEntryCount()), 0);
+            data2.addEntry(new Entry(-lastLevel.floatValue(), set2.getEntryCount()), 0);
+
+
 
 
             amplChart.notifyDataSetChanged();
-
             amplChart.setVisibleXRangeMaximum(120);
-
             amplChart.moveViewToX(data.getXValCount() - 121);
+
+            negAmplChart.notifyDataSetChanged();
+
+            negAmplChart.setVisibleXRangeMaximum(120);
+            negAmplChart.moveViewToX(data.getXValCount() - 121);
+
 
         }
     }
@@ -182,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
 
                             @Override
                             public void run() {
-                                addEntry(lastLevel, System.currentTimeMillis());
+                                addEntry(-lastLevel, System.currentTimeMillis());
                             }
                         });
                     }
@@ -204,9 +252,12 @@ public class MainActivity extends AppCompatActivity {
             if (audio != null) {
 
                 bufferReadResult = audio.read(buffer, 0, bufferSize);
+
                 double sumLevel = 0;
                 for (int i = 0; i < bufferReadResult; i++) {
                     sumLevel += buffer[i];
+//                    addEntry((double)buffer[i], System.currentTimeMillis());
+
                 }
                 lastLevel = Math.abs((sumLevel / bufferReadResult));
             }
