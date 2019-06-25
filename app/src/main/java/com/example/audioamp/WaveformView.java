@@ -25,24 +25,18 @@ public class WaveformView extends View {
     private Canvas currentCanvas;
     int measuredWidth,measuredHeight,halfheight;
     int currentX,strokeWidth;
-    boolean isDraw= false;
     float heightToDraw;
 
 
-    public void enableDraw(float val){
-        isDraw=true;
+    public void setHeightToDraw(float val){
         heightToDraw = val;
     }
 
-    public void disableDraw(){
-        isDraw=false;
-    }
 
 
     public interface WaveformListener{
 
         public void getCanvasObject(Canvas canvas);
-
 
     }
 
@@ -78,7 +72,7 @@ public class WaveformView extends View {
          measuredWidth = getMeasuredWidth();
          measuredHeight = getMeasuredHeight();
          halfheight = measuredHeight/2;
-         currentX=getMeasuredWidth()/2;
+         currentX=20;
 
     }
 
@@ -86,25 +80,26 @@ public class WaveformView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-//        currentCanvas = canvas;
+        currentCanvas = canvas;
 
-        if (mListener != null) {
-            mListener.getCanvasObject(canvas);
-        }
-
-//        if(isDraw){
-            Log.d("Waveform","onDraw "+heightToDraw);
-
-            canvas.drawLine(getMeasuredWidth()/2,getMeasuredHeight()/2,getMeasuredWidth()/2,(getMeasuredHeight()/2)-heightToDraw,mGridPaint);
-            canvas.drawLine(getMeasuredWidth()/2,getMeasuredHeight()/2,getMeasuredWidth()/2,(getMeasuredHeight()/2)+heightToDraw,negPaint);
-//            currentX += strokeWidth;
+//        if (mListener != null) {
+//            mListener.getCanvasObject(canvas);
 //        }
+
+            Log.d("Waveform","onDraw "+canvas);
+            currentX = getMeasuredWidth()/2;
+
+            canvas.drawLine(currentX,getMeasuredHeight()/2,currentX,(getMeasuredHeight()/2)-heightToDraw,mGridPaint);
+            canvas.drawLine(currentX,getMeasuredHeight()/2,currentX,(getMeasuredHeight()/2)+heightToDraw,negPaint);
+            currentX += strokeWidth;
+
 
 //        startWaveform();
 
         super.onDraw(canvas);
 
     }
+
 
     public void startWaveform(){
         Random rand = new Random();
@@ -125,9 +120,9 @@ public class WaveformView extends View {
 
     }
 
-    public void plot(Float val){
+    public void plot(){
 
-
+        draw(currentCanvas);
     }
 
 
