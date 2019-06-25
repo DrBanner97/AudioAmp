@@ -107,6 +107,9 @@ public class WaveformView extends View {
 
         for(int i=0;i<250;i++){
             int val = rand.nextInt(500);
+            currentCanvas.drawLine(currentX,getMeasuredHeight()/2,currentX,(getMeasuredHeight()/2)-heightToDraw,mGridPaint);
+            currentCanvas.drawLine(currentX,getMeasuredHeight()/2,currentX,(getMeasuredHeight()/2)+heightToDraw,negPaint);
+            currentX += strokeWidth;
 
 
         }
